@@ -671,7 +671,7 @@ export const useCursorStore = defineStore('cursor', () => {
    */
   async function ensureCursorNotRunning(forceKill: boolean) {
     if (!forceKill && (await checkCursorRunning())) {
-      throw new Error('Cursor进程正在运行, 请先关闭Cursor');
+      throw new Error('Cursor进程正在运行, 请先关闭Cursor')
     }
   }
 

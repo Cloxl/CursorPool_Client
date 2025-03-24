@@ -8,7 +8,6 @@
     NButton,
     useMessage,
     NSpace,
-    NAutoComplete,
     NTag,
     NModal,
     NTabs,
@@ -24,6 +23,7 @@
   import { addHistoryRecord } from '../utils/history'
   import { useUserStore } from '../stores/user'
   import InboundSelector from './InboundSelector.vue'
+  import { emailProviders, hiddenValidDomains } from '../config/email-providers'
 
   // 定义组件事件
   const emit = defineEmits(['login-success'])
@@ -48,88 +48,6 @@
 
   // 邮箱验证正则
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-
-  // 邮箱提供商配置
-  const emailProviders = [
-    {
-      label: 'Google',
-      domain: 'gmail.com',
-      color: 'error',
-    },
-    {
-      label: '腾讯',
-      domain: 'qq.com',
-      color: 'success',
-    },
-    {
-      label: '腾讯',
-      domain: 'foxmail.com',
-      color: 'success',
-    },
-    {
-      label: '网易',
-      domain: '163.com',
-      color: 'warning',
-    },
-    {
-      label: '网易',
-      domain: '126.com',
-      color: 'warning',
-    },
-    {
-      label: 'Microsoft',
-      domain: 'outlook.com',
-      color: 'info',
-    },
-    {
-      label: 'Microsoft',
-      domain: 'hotmail.com',
-      color: 'info',
-    },
-    {
-      label: 'Yahoo',
-      domain: 'yahoo.com',
-      color: 'primary',
-    },
-    {
-      label: '网易',
-      domain: 'yeah.net',
-      color: 'warning',
-    },
-    {
-      label: '新浪',
-      domain: 'sina.com',
-      color: 'error',
-    },
-    {
-      label: '新浪',
-      domain: 'sina.cn',
-      color: 'error',
-    },
-    {
-      label: '新浪',
-      domain: '21cn.com',
-      color: 'error',
-    },
-    {
-      label: '阿里',
-      domain: 'aliyun.com',
-      color: 'primary',
-    },
-    {
-      label: '搜狐',
-      domain: 'sohu.com',
-      color: 'info',
-    },
-    {
-      label: '139',
-      domain: '139.com',
-      color: 'success',
-    },
-  ]
-
-  // 隐藏域名列表
-  const hiddenValidDomains = ['cloxl.com', '52ai.org']
 
   /**
    * 表单状态管理
@@ -266,10 +184,10 @@
     }
 
     const atIndex = inputValue.lastIndexOf('@')
+    const username = atIndex !== -1 ? inputValue.substring(0, atIndex) : inputValue
 
     // When there's an @ symbol, show all matching domain options
     if (atIndex !== -1) {
-      const username = inputValue.substring(0, atIndex)
       const domainPrefix = inputValue.substring(atIndex + 1).toLowerCase()
 
       // If just @ with no domain prefix yet, show all providers
@@ -865,38 +783,6 @@
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   }
-
-  /* 处理滚动条 */
-  /* :deep(.n-scrollbar) {
-    overflow: visible !important;
-  }
-
-  :deep(.n-scrollbar-rail) {
-    z-index: 10 !important;
-  } */
-
-  /* 隐藏外部滚动条，保留内部滚动条 */
-  /* :deep(.n-base-select-menu > .n-scrollbar > .n-scrollbar-rail) {
-    display: none !important;
-  }
-
-  :deep(.n-base-select-menu > .n-scrollbar) {
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
-    overflow: visible !important;
-  }
-
-  :deep(.n-base-select-menu > .n-scrollbar::-webkit-scrollbar) {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-  } */
-
-  /* 确保内部滚动条正常可用 */
-  /* :deep(.n-base-select-menu-option-wrapper) {
-    max-height: 250px !important;
-    overflow-y: auto !important;
-  } */
 
   /* 标签页容器样式 */
   .full-width-tabs :deep(.n-tabs-wrapper) {
