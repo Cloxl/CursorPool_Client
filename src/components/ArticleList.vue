@@ -2,7 +2,11 @@
   import { ref, onMounted, watch, computed } from 'vue'
   import { NModal, NSpace, NButton, NScrollbar } from 'naive-ui'
   import { useArticleStore } from '../stores/article'
+  import { useTheme } from '../composables/theme'
   import type { Article } from '../api/types'
+
+  // 获取主题变量和当前主题
+  const { isDarkMode } = useTheme()
 
   // 初始化store
   const articleStore = useArticleStore()
@@ -17,10 +21,29 @@
     return textArea.value
   }
 
-  // 解码后的文章内容
-  const decodedContent = computed(() => {
+  // 在内容中注入样式以确保链接颜色正确
+  const processedContent = computed(() => {
     if (!currentArticle.value) return ''
-    return decodeHtmlEntities(currentArticle.value.content)
+    let content = decodeHtmlEntities(currentArticle.value.content)
+
+    // 仅在暗色模式下修改链接样式
+    if (isDarkMode.value) {
+      // 使用DOM解析和处理HTML内容，以便直接修改链接样式
+      const tempDiv = document.createElement('div')
+      tempDiv.innerHTML = content
+
+      // 查找所有链接并添加内联样式
+      const links = tempDiv.querySelectorAll('a')
+      links.forEach((link) => {
+        link.style.color = '#63e2b7'
+        link.style.fontWeight = '500'
+        link.style.textDecoration = 'none'
+      })
+
+      content = tempDiv.innerHTML
+    }
+
+    return content
   })
 
   // 在组件挂载时获取公告
@@ -136,11 +159,16 @@
     v-model:show="showModal"
     preset="card"
     :title="currentArticle?.title || '系统公告'"
-    style="width: 600px; max-width: 90vw"
+    class="w-600px max-w-90vw"
     :mask-closable="false"
   >
-    <n-scrollbar style="max-height: 60vh">
-      <div v-if="currentArticle" class="article-html-content" v-html="decodedContent"></div>
+    <n-scrollbar class="max-h-60vh">
+      <div
+        v-if="currentArticle"
+        class="p-4 leading-normal article-content"
+        :class="isDarkMode ? 'article-dark' : 'article-light'"
+        v-html="processedContent"
+      ></div>
     </n-scrollbar>
     <template #footer>
       <n-space justify="end">
@@ -150,41 +178,94 @@
   </n-modal>
 </template>
 
-<style scoped>
-  .article-html-content {
-    padding: 16px;
-    line-height: 1.6;
+<style>
+  /* 浅色主题样式 */
+  .article-light :deep(h1),
+  .article-light :deep(h2),
+  .article-light :deep(h3) {
+    @apply mt-4 mb-2 text-[#333] font-bold;
   }
 
-  :deep(h1),
-  :deep(h2),
-  :deep(h3) {
-    margin-top: 16px;
-    margin-bottom: 8px;
-    color: #333;
+  .article-light :deep(p) {
+    @apply my-4 text-[#555];
   }
 
-  :deep(p) {
-    margin: 16px 0;
-    color: #555;
+  .article-light :deep(a) {
+    @apply text-[#2080f0] no-underline hover:underline;
   }
 
-  :deep(ul),
-  :deep(ol) {
-    padding-left: 24px;
-    margin: 16px 0;
+  .article-light :deep(ul),
+  .article-light :deep(ol) {
+    @apply pl-6 my-4;
   }
 
-  :deep(li) {
-    margin: 8px 0;
+  .article-light :deep(li) {
+    @apply my-2;
   }
 
-  :deep(img) {
-    max-width: 100%;
-    height: auto;
+  .article-light :deep(img) {
+    @apply max-w-full h-auto rounded;
   }
 
-  :deep(div) {
-    max-width: 100%;
+  /* 暗色主题样式 */
+  .article-dark :deep(.n-card) {
+    @apply bg-[#1e1e1e];
+  }
+
+  .article-dark :deep(.n-card-header__main) {
+    @apply text-white font-bold;
+  }
+
+  .article-dark :deep(h1),
+  .article-dark :deep(h2),
+  .article-dark :deep(h3) {
+    @apply mt-4 mb-2 text-white font-bold;
+  }
+
+  .article-dark :deep(p) {
+    @apply my-4 text-[#e6e6e6];
+  }
+
+  /* 增强链接样式 */
+  .article-dark :deep(a),
+  .article-dark :deep(a:link),
+  .article-dark :deep(a:visited) {
+    color: #63e2b7 !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+  }
+
+  .article-dark :deep(a:hover) {
+    text-decoration: underline !important;
+    color: #7aefc7 !important;
+  }
+
+  .article-content.article-dark a {
+    color: #63e2b7 !important;
+  }
+
+  .article-dark :deep(ul),
+  .article-dark :deep(ol) {
+    @apply pl-6 my-4 text-[#e6e6e6];
+  }
+
+  .article-dark :deep(li) {
+    @apply my-2 text-[#e6e6e6];
+  }
+
+  .article-dark :deep(code) {
+    @apply bg-[#2c2c2c] text-[#63e2b7] px-1 py-0.5 rounded font-mono;
+  }
+
+  .article-dark :deep(pre) {
+    @apply bg-[#2c2c2c] p-3 rounded overflow-x-auto;
+  }
+
+  .article-dark :deep(hr) {
+    @apply border-t border-[#444] my-4;
+  }
+
+  .article-dark :deep(blockquote) {
+    @apply border-l-4 border-[#63e2b7] pl-4 my-4 text-[#e0e0e0] bg-[rgba(99,226,183,0.1)] p-2;
   }
 </style>
