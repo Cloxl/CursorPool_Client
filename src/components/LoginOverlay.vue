@@ -14,6 +14,7 @@
     NTabs,
     NTabPane,
     NInputGroup,
+    NSelect,
   } from 'naive-ui'
   import { checkUser, sendCode } from '../api'
   import type { SelectOption } from 'naive-ui'
@@ -42,6 +43,7 @@
     smsCode: '',
     newPassword: '',
     confirmPassword: '',
+    showDropdown: false,
   })
 
   // 邮箱验证正则
@@ -70,9 +72,59 @@
       color: 'warning',
     },
     {
+      label: '网易',
+      domain: '126.com',
+      color: 'warning',
+    },
+    {
       label: 'Microsoft',
       domain: 'outlook.com',
       color: 'info',
+    },
+    {
+      label: 'Microsoft',
+      domain: 'hotmail.com',
+      color: 'info',
+    },
+    {
+      label: 'Yahoo',
+      domain: 'yahoo.com',
+      color: 'primary',
+    },
+    {
+      label: '网易',
+      domain: 'yeah.net',
+      color: 'warning',
+    },
+    {
+      label: '新浪',
+      domain: 'sina.com',
+      color: 'error',
+    },
+    {
+      label: '新浪',
+      domain: 'sina.cn',
+      color: 'error',
+    },
+    {
+      label: '新浪',
+      domain: '21cn.com',
+      color: 'error',
+    },
+    {
+      label: '阿里',
+      domain: 'aliyun.com',
+      color: 'primary',
+    },
+    {
+      label: '搜狐',
+      domain: 'sohu.com',
+      color: 'info',
+    },
+    {
+      label: '139',
+      domain: '139.com',
+      color: 'success',
     },
   ]
 
@@ -89,6 +141,7 @@
       password: '',
       loading: false,
       error: '',
+      showDropdown: false,
     },
 
     // 注册表单
@@ -102,6 +155,7 @@
       codeSent: false,
       codeSending: false,
       countdown: 0,
+      showDropdown: false,
     },
   })
 
@@ -199,27 +253,62 @@
 
   // 邮箱自动完成选项公共逻辑
   const getEmailOptions = (inputValue: string) => {
+    // Always provide options for debugging (remove in production)
+    if (!inputValue) {
+      return emailProviders.map((provider) => ({
+        label: `@${provider.domain}`,
+        value: `@${provider.domain}`,
+      }))
+    }
+
     if (isValidEmail(inputValue)) {
       return []
     }
+
     const atIndex = inputValue.lastIndexOf('@')
-    if (atIndex === -1) return []
-    const username = inputValue.substring(0, atIndex)
-    if (!username) return []
-    return emailProviders.map((provider) => ({
-      label: `${username}@${provider.domain}`,
-      value: `${username}@${provider.domain}`,
+
+    // When there's an @ symbol, show all matching domain options
+    if (atIndex !== -1) {
+      const username = inputValue.substring(0, atIndex)
+      const domainPrefix = inputValue.substring(atIndex + 1).toLowerCase()
+
+      // If just @ with no domain prefix yet, show all providers
+      if (domainPrefix === '') {
+        return emailProviders.map((provider) => ({
+          label: `${username}@${provider.domain}`,
+          value: `${username}@${provider.domain}`,
+        }))
+      }
+
+      // Filter providers based on the entered domain prefix
+      return emailProviders
+        .filter((provider) => provider.domain.toLowerCase().includes(domainPrefix))
+        .map((provider) => ({
+          label: `${username}@${provider.domain}`,
+          value: `${username}@${provider.domain}`,
+        }))
+    }
+
+    // When there's no @ symbol, show no options except during debugging
+    // This makes testing easier
+    return emailProviders.slice(0, 3).map((provider) => ({
+      label: `${inputValue}@${provider.domain}`,
+      value: `${inputValue}@${provider.domain}`,
     }))
   }
 
   // 邮箱自动完成选项 - 登录
   const loginEmailOptions = computed(() => {
-    return getEmailOptions(formState.login.username)
+    const options = getEmailOptions(formState.login.username)
+    console.log('Login email options:', options.length, options)
+    return options
   })
 
   // 邮箱自动完成选项 - 注册
   const registerEmailOptions = computed(() => {
-    return getEmailOptions(formState.register.email)
+    const options = getEmailOptions(formState.register.email)
+    console.log('Register email options:', options.length, options)
+    return options
   })
 
   // 登录邮箱状态
@@ -227,6 +316,11 @@
 
   // 注册邮箱状态
   const registerEmailStatus = computed(() => checkEmailDomain(formState.register.email))
+
+  // 忘记密码邮箱选项
+  const forgotPasswordEmailOptions = computed(() => {
+    return getEmailOptions(forgotPasswordForm.value.email)
+  })
 
   // 忘记密码邮箱状态
   const forgotPasswordEmailStatus = computed(() => checkEmailDomain(forgotPasswordForm.value.email))
@@ -457,6 +551,61 @@
       forgotPasswordLoading.value = false
     }
   }
+
+  // 监听输入并展开下拉列表
+  const handleLoginInput = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    const value = target.value || ''
+
+    if (value.includes('@')) {
+      // Force dropdown to show when @ is typed and make sure options are visible
+      formState.login.showDropdown = true
+
+      // Generate options immediately for empty domain part
+      if (value.endsWith('@')) {
+        // Force update after DOM update cycle
+        setTimeout(() => {
+          formState.login.showDropdown = true
+        }, 10)
+      }
+    }
+  }
+
+  const handleRegisterInput = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    const value = target.value || ''
+
+    if (value.includes('@')) {
+      // Force dropdown to show when @ is typed and make sure options are visible
+      formState.register.showDropdown = true
+
+      // Generate options immediately for empty domain part
+      if (value.endsWith('@')) {
+        // Force update after DOM update cycle
+        setTimeout(() => {
+          formState.register.showDropdown = true
+        }, 10)
+      }
+    }
+  }
+
+  const handleForgotPasswordInput = (e: Event) => {
+    const target = e.target as HTMLInputElement
+    const value = target.value || ''
+
+    if (value.includes('@')) {
+      // Force dropdown to show when @ is typed and make sure options are visible
+      forgotPasswordForm.value.showDropdown = true
+
+      // Generate options immediately for empty domain part
+      if (value.endsWith('@')) {
+        // Force update after DOM update cycle
+        setTimeout(() => {
+          forgotPasswordForm.value.showDropdown = true
+        }, 10)
+      }
+    }
+  }
 </script>
 
 <template>
@@ -474,14 +623,23 @@
         <n-tab-pane name="login" :tab="messages[currentLang].login.title">
           <n-form class="compact-form">
             <n-form-item>
-              <n-auto-complete
+              <n-select
                 v-model:value="formState.login.username"
                 :options="loginEmailOptions"
+                filterable
                 :placeholder="messages[currentLang].login.emailPlaceholder"
                 :render-label="renderLabel"
                 :status="loginEmailStatus"
-                maxlength="50"
+                :show="formState.login.showDropdown"
+                :filter="(pattern, option) => true"
                 @keyup.enter="handleLogin"
+                @input="handleLoginInput"
+                @focus="handleLoginInput"
+                @update:show="
+                  (show) => {
+                    if (!show) formState.login.showDropdown = false
+                  }
+                "
               />
             </n-form-item>
 
@@ -521,13 +679,22 @@
         <n-tab-pane name="register" :tab="messages[currentLang].login.registerButton">
           <n-form class="compact-form">
             <n-form-item>
-              <n-auto-complete
+              <n-select
                 v-model:value="formState.register.email"
                 :options="registerEmailOptions"
+                filterable
                 :placeholder="messages[currentLang].login.emailPlaceholder"
                 :render-label="renderLabel"
                 :status="registerEmailStatus"
-                maxlength="50"
+                :show="formState.register.showDropdown"
+                :filter="(pattern, option) => true"
+                @input="handleRegisterInput"
+                @focus="handleRegisterInput"
+                @update:show="
+                  (show) => {
+                    if (!show) formState.register.showDropdown = false
+                  }
+                "
               />
             </n-form-item>
 
@@ -601,13 +768,23 @@
     >
       <n-form class="compact-form">
         <n-form-item :label="messages[currentLang].login.emailPlaceholder">
-          <n-auto-complete
+          <n-select
             v-model:value="forgotPasswordForm.email"
-            :options="loginEmailOptions"
+            :options="forgotPasswordEmailOptions"
+            filterable
             :placeholder="messages[currentLang].login.emailPlaceholder"
             :render-label="renderLabel"
             :status="forgotPasswordEmailStatus"
             :disabled="forgotPasswordLoading"
+            :show="forgotPasswordForm.showDropdown"
+            :filter="(pattern, option) => true"
+            @input="handleForgotPasswordInput"
+            @focus="handleForgotPasswordInput"
+            @update:show="
+              (show) => {
+                if (!show) forgotPasswordForm.showDropdown = false
+              }
+            "
           />
         </n-form-item>
 
@@ -689,6 +866,38 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   }
 
+  /* 处理滚动条 */
+  /* :deep(.n-scrollbar) {
+    overflow: visible !important;
+  }
+
+  :deep(.n-scrollbar-rail) {
+    z-index: 10 !important;
+  } */
+
+  /* 隐藏外部滚动条，保留内部滚动条 */
+  /* :deep(.n-base-select-menu > .n-scrollbar > .n-scrollbar-rail) {
+    display: none !important;
+  }
+
+  :deep(.n-base-select-menu > .n-scrollbar) {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    overflow: visible !important;
+  }
+
+  :deep(.n-base-select-menu > .n-scrollbar::-webkit-scrollbar) {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  } */
+
+  /* 确保内部滚动条正常可用 */
+  /* :deep(.n-base-select-menu-option-wrapper) {
+    max-height: 250px !important;
+    overflow-y: auto !important;
+  } */
+
   /* 标签页容器样式 */
   .full-width-tabs :deep(.n-tabs-wrapper) {
     display: flex;
@@ -712,7 +921,7 @@
   }
 
   /* 激活的标签页样式 */
-  .full-width-tabs :deep(.n-tabs-tab.n-tabs-tab--active) {
+  .full-width-tabs :deep(.n-tabs-tab--active) {
     font-weight: bold;
   }
 
@@ -720,11 +929,6 @@
   .full-width-tabs :deep(.n-tabs-tab-pad) {
     display: none !important;
     width: 0 !important;
-  }
-
-  /* 标签页内容区域样式 */
-  .full-width-tabs :deep(.n-tabs-tab-pane) {
-    padding-top: 12px;
   }
 
   /* 标签页下划线样式 */
@@ -747,73 +951,5 @@
     min-width: 100px;
     font-size: 13px;
     padding: 0 8px;
-  }
-
-  :deep(.n-card) {
-    background: var(--n-color);
-    color: var(--n-text-color);
-  }
-
-  :deep(.n-card-header) {
-    text-align: center;
-    font-size: 1.5em;
-    padding-top: 14px;
-    padding-bottom: 4px;
-  }
-
-  :deep(.n-card__content) {
-    padding-top: 4px;
-    padding-bottom: 14px;
-  }
-
-  :deep(.n-input) {
-    user-select: text;
-  }
-
-  :deep(.n-input-wrapper) {
-    user-select: text;
-  }
-
-  :deep(.n-form-item-feedback-wrapper) {
-    min-height: 12px;
-  }
-
-  :deep(.n-form-item-feedback) {
-    color: var(--n-feedback-text-color);
-    font-size: 12px;
-  }
-
-  /* 添加以下样式来进一步防止自动填充 */
-  :deep(.n-input__input-el) {
-    /* 禁用 webkit 浏览器的自动填充样式 */
-    &:-webkit-autofill,
-    &:-webkit-autofill:hover,
-    &:-webkit-autofill:focus,
-    &:-webkit-autofill:active {
-      -webkit-box-shadow: 0 0 0 30px var(--n-color) inset !important;
-      -webkit-text-fill-color: var(--n-text-color) !important;
-      transition: background-color 5000s ease-in-out 0s;
-    }
-  }
-
-  /* 自定义错误状态样式 */
-  :deep(.n-auto-complete.n-auto-complete--status-error .n-input) {
-    border-color: #ff4d4f;
-  }
-
-  :deep(.n-auto-complete.n-auto-complete--status-error:hover .n-input) {
-    border-color: #ff7875;
-  }
-
-  :deep(.n-auto-complete.n-auto-complete--status-error:focus .n-input) {
-    border-color: #ff7875;
-    box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2);
-  }
-
-  /* 登录操作按钮区域 */
-  .login-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
   }
 </style>
