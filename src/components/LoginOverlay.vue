@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { ref, reactive, computed, watch } from 'vue'
+  import { ref, reactive, computed, watch, type Ref } from 'vue'
   import {
     NCard,
     NForm,
@@ -192,40 +192,40 @@
 
       // If just @ with no domain prefix yet, show all providers
       if (domainPrefix === '') {
-        return emailProviders.map((provider) => ({
+        const options = emailProviders.map((provider) => ({
           label: `${username}@${provider.domain}`,
-          value: `${username}@${provider.domain}`,
+          value: `@${provider.domain}`, // Changed to just the domain with @ prefix
         }))
+        return options
       }
 
       // Filter providers based on the entered domain prefix
-      return emailProviders
+      const options = emailProviders
         .filter((provider) => provider.domain.toLowerCase().includes(domainPrefix))
         .map((provider) => ({
           label: `${username}@${provider.domain}`,
-          value: `${username}@${provider.domain}`,
+          value: `@${provider.domain}`, // Changed to just the domain with @ prefix
         }))
+      return options
     }
 
-    // When there's no @ symbol, show no options except during debugging
-    // This makes testing easier
-    return emailProviders.slice(0, 3).map((provider) => ({
+    // When there's no @ symbol, show sample options
+    const options = emailProviders.slice(0, 3).map((provider) => ({
       label: `${inputValue}@${provider.domain}`,
-      value: `${inputValue}@${provider.domain}`,
+      value: `${inputValue}@${provider.domain}`, // Full email as the value
     }))
+    return options
   }
 
   // 邮箱自动完成选项 - 登录
   const loginEmailOptions = computed(() => {
     const options = getEmailOptions(formState.login.username)
-    console.log('Login email options:', options.length, options)
     return options
   })
 
   // 邮箱自动完成选项 - 注册
   const registerEmailOptions = computed(() => {
     const options = getEmailOptions(formState.register.email)
-    console.log('Register email options:', options.length, options)
     return options
   })
 
@@ -470,59 +470,86 @@
     }
   }
 
-  // 监听输入并展开下拉列表
-  const handleLoginInput = (e: Event) => {
+  // Also track the username part before it's lost
+  const lastTypedUsername = ref('')
+  const lastTypedRegisterUsername = ref('')
+  const lastTypedForgotPasswordUsername = ref('')
+
+  // Common function to handle email input
+  const handleEmailInput = (
+    e: Event,
+    formPart: { showDropdown: boolean },
+    usernameRef: Ref<string>,
+  ) => {
     const target = e.target as HTMLInputElement
     const value = target.value || ''
 
+    // Store the username part for later use
     if (value.includes('@')) {
+      usernameRef.value = value.split('@')[0]
+
       // Force dropdown to show when @ is typed and make sure options are visible
-      formState.login.showDropdown = true
+      formPart.showDropdown = true
 
       // Generate options immediately for empty domain part
       if (value.endsWith('@')) {
         // Force update after DOM update cycle
         setTimeout(() => {
-          formState.login.showDropdown = true
+          formPart.showDropdown = true
         }, 10)
       }
+    } else {
+      // No @ symbol yet, save the whole input as username
+      usernameRef.value = value
     }
+  }
+
+  // Update email input handlers to use the common function
+  const handleLoginInput = (e: Event) => {
+    handleEmailInput(e, formState.login, lastTypedUsername)
   }
 
   const handleRegisterInput = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    const value = target.value || ''
-
-    if (value.includes('@')) {
-      // Force dropdown to show when @ is typed and make sure options are visible
-      formState.register.showDropdown = true
-
-      // Generate options immediately for empty domain part
-      if (value.endsWith('@')) {
-        // Force update after DOM update cycle
-        setTimeout(() => {
-          formState.register.showDropdown = true
-        }, 10)
-      }
-    }
+    handleEmailInput(e, formState.register, lastTypedRegisterUsername)
   }
 
   const handleForgotPasswordInput = (e: Event) => {
-    const target = e.target as HTMLInputElement
-    const value = target.value || ''
+    handleEmailInput(e, forgotPasswordForm.value, lastTypedForgotPasswordUsername)
+  }
 
-    if (value.includes('@')) {
-      // Force dropdown to show when @ is typed and make sure options are visible
-      forgotPasswordForm.value.showDropdown = true
+  // Common function to handle email selection
+  const handleEmailSelect = (
+    value: string,
+    usernameRef: Ref<string>,
+    formValue: { username?: string; email?: string },
+    propertyName: 'username' | 'email',
+  ) => {
+    // If the selected value is just a domain (starts with @)
+    if (value && value.startsWith('@')) {
+      // First try to use the tracked username, otherwise try splitting the current value
+      const currentValue = formValue[propertyName] || ''
+      const username = usernameRef.value || currentValue.split('@')[0] || ''
 
-      // Generate options immediately for empty domain part
-      if (value.endsWith('@')) {
-        // Force update after DOM update cycle
-        setTimeout(() => {
-          forgotPasswordForm.value.showDropdown = true
-        }, 10)
-      }
+      // Combine username with the selected domain
+      const fullEmail = username + value
+      formValue[propertyName] = fullEmail
+    } else {
+      // If it's already a complete email or something else, use it directly
+      formValue[propertyName] = value
     }
+  }
+
+  // Update email selection handlers to use the common function
+  const handleLoginEmailSelect = (value: string) => {
+    handleEmailSelect(value, lastTypedUsername, formState.login, 'username')
+  }
+
+  const handleRegisterEmailSelect = (value: string) => {
+    handleEmailSelect(value, lastTypedRegisterUsername, formState.register, 'email')
+  }
+
+  const handleForgotPasswordEmailSelect = (value: string) => {
+    handleEmailSelect(value, lastTypedForgotPasswordUsername, forgotPasswordForm.value, 'email')
   }
 </script>
 
@@ -545,14 +572,16 @@
                 v-model:value="formState.login.username"
                 :options="loginEmailOptions"
                 filterable
+                clearable
                 :placeholder="messages[currentLang].login.emailPlaceholder"
                 :render-label="renderLabel"
                 :status="loginEmailStatus"
                 :show="formState.login.showDropdown"
-                :filter="(pattern, option) => true"
+                :filter="(pattern: string, option: SelectOption) => true"
                 @keyup.enter="handleLogin"
                 @input="handleLoginInput"
                 @focus="handleLoginInput"
+                @update:value="handleLoginEmailSelect"
                 @update:show="
                   (show) => {
                     if (!show) formState.login.showDropdown = false
@@ -601,13 +630,15 @@
                 v-model:value="formState.register.email"
                 :options="registerEmailOptions"
                 filterable
+                clearable
                 :placeholder="messages[currentLang].login.emailPlaceholder"
                 :render-label="renderLabel"
                 :status="registerEmailStatus"
                 :show="formState.register.showDropdown"
-                :filter="(pattern, option) => true"
+                :filter="(pattern: string, option: SelectOption) => true"
                 @input="handleRegisterInput"
                 @focus="handleRegisterInput"
+                @update:value="handleRegisterEmailSelect"
                 @update:show="
                   (show) => {
                     if (!show) formState.register.showDropdown = false
@@ -690,14 +721,16 @@
             v-model:value="forgotPasswordForm.email"
             :options="forgotPasswordEmailOptions"
             filterable
+            clearable
             :placeholder="messages[currentLang].login.emailPlaceholder"
             :render-label="renderLabel"
             :status="forgotPasswordEmailStatus"
             :disabled="forgotPasswordLoading"
             :show="forgotPasswordForm.showDropdown"
-            :filter="(pattern, option) => true"
+            :filter="(pattern: string, option: SelectOption) => true"
             @input="handleForgotPasswordInput"
             @focus="handleForgotPasswordInput"
+            @update:value="handleForgotPasswordEmailSelect"
             @update:show="
               (show) => {
                 if (!show) forgotPasswordForm.showDropdown = false
