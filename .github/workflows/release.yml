@@ -6,6 +6,8 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - 'ci/cd'
 
 permissions:
   contents: write
@@ -170,6 +172,20 @@ jobs:
                   "type": "fixedRuntime",
                   "path": "./webview2-runtime/${{ matrix.arch }}/"
                 }
+              }
+            },
+            "plugins": {
+              "updater": {
+                "active": true,
+                "dialog": false,
+                "pubkey": "${{ secrets.TAURI_UPDATER_PUBKEY }}",
+                "endpoints": [
+                  "${{ secrets.WEBVIEW2_UPDATE_ENDPOINT_PRIMARY }}"
+                ],
+                "windows": {
+                  "installMode": "passive"
+                },
+                "dangerousInsecureTransportProtocol": true
               }
             }
           }
