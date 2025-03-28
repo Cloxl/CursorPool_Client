@@ -220,8 +220,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
-          tauriScript: pnpm
-          args: --target ${{ matrix.target }} --config src-tauri/tauri.windows.conf.json
+          configPath: src-tauri/tauri.windows.conf.json
+          args: --target ${{ matrix.target }}
           includeUpdaterJson: false
 
       - name: Rename Files
