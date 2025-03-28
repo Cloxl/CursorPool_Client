@@ -199,9 +199,9 @@ jobs:
           
           # Choose download link based on architecture
           if ("${{ matrix.arch }}" -eq "x64") {
-            Invoke-WebRequest -Uri "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/949b4951-7f54-4504-8a73-ccad659afdb1/Microsoft.WebView2.FixedVersionRuntime.134.0.3124.72.x64.cab" -OutFile "webview2-runtime.cab"
+            Invoke-WebRequest -Uri "https://github.com/westinyang/WebView2RuntimeArchive/releases/download/109.0.1518.78/Microsoft.WebView2.FixedVersionRuntime.109.0.1518.78.x64.cab" -OutFile "webview2-runtime.cab"
           } else {
-            Invoke-WebRequest -Uri "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/abc49133-bb96-41e6-a555-8ea087ff4564/Microsoft.WebView2.FixedVersionRuntime.134.0.3124.72.arm64.cab" -OutFile "webview2-runtime.cab"
+            Invoke-WebRequest -Uri "https://github.com/westinyang/WebView2RuntimeArchive/releases/download/109.0.1518.78/Microsoft.WebView2.FixedVersionRuntime.109.0.1518.78.arm64.cab" -OutFile "webview2-runtime.cab"
           }
           
           cmd /c "expand webview2-runtime.cab -F:* .\src-tauri\webview2-runtime\${{ matrix.arch }}\"
