@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   publish-tauri:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/ci/cd'
     strategy:
       fail-fast: false
       matrix:
@@ -109,7 +109,7 @@ jobs:
           includeUpdaterJson: true
 
   publish-webview2-fixed:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/ci/cd'
     strategy:
       fail-fast: false
       matrix:
