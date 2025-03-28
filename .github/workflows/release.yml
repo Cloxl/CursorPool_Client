@@ -233,7 +233,7 @@ jobs:
           foreach ($file in $msiFiles) {
             $newName = $file.Name -replace "\.msi$", "_fixed_webview2.msi"
             $newPath = Join-Path -Path $file.Directory.FullName -ChildPath $newName
-            Rename-Item -Path $file.FullName -Destination $newPath
+            Rename-Item -Path $file.FullName -NewName $newName
             Write-Host "Renamed: $($file.Name) -> $newName"
           }
 
@@ -241,8 +241,7 @@ jobs:
           $exeFiles = Get-ChildItem -Path ".\src-tauri\target\${{ matrix.target }}\release\bundle\nsis\*-setup.exe"
           foreach ($file in $exeFiles) {
             $newName = $file.Name -replace "-setup\.exe$", "_fixed_webview2-setup.exe"
-            $newPath = Join-Path -Path $file.Directory.FullName -ChildPath $newName
-            Rename-Item -Path $file.FullName -Destination $newPath
+            Rename-Item -Path $file.FullName -NewName $newName
             Write-Host "Renamed: $($file.Name) -> $newName"
           }
 
@@ -250,16 +249,14 @@ jobs:
           $sigFiles = Get-ChildItem -Path ".\src-tauri\target\${{ matrix.target }}\release\bundle\nsis\*-setup.exe.sig"
           foreach ($file in $sigFiles) {
             $newName = $file.Name -replace "-setup\.exe\.sig$", "_fixed_webview2-setup.exe.sig"
-            $newPath = Join-Path -Path $file.Directory.FullName -ChildPath $newName
-            Rename-Item -Path $file.FullName -Destination $newPath
+            Rename-Item -Path $file.FullName -NewName $newName
             Write-Host "Renamed: $($file.Name) -> $newName"
           }
           
           $sigFiles = Get-ChildItem -Path ".\src-tauri\target\${{ matrix.target }}\release\bundle\msi\*.msi.sig"
           foreach ($file in $sigFiles) {
             $newName = $file.Name -replace "\.msi\.sig$", "_fixed_webview2.msi.sig"
-            $newPath = Join-Path -Path $file.Directory.FullName -ChildPath $newName
-            Rename-Item -Path $file.FullName -Destination $newPath
+            Rename-Item -Path $file.FullName -NewName $newName
             Write-Host "Renamed: $($file.Name) -> $newName"
           }
 
