@@ -163,14 +163,20 @@ jobs:
       - name: Prepare WebView2 Fixed Runtime
         shell: pwsh
         run: |
-          # Create WebView2 configuration file
+          # Download WebView2 Runtime
+          invoke-webrequest -uri https://github.com/westinyang/WebView2RuntimeArchive/releases/download/109.0.1518.78/Microsoft.WebView2.FixedVersionRuntime.109.0.1518.78.${{ matrix.arch }}.cab -outfile Microsoft.WebView2.FixedVersionRuntime.109.0.1518.78.${{ matrix.arch }}.cab
+          
+          # Extract WebView2 Runtime to src-tauri directory
+          Expand .\Microsoft.WebView2.FixedVersionRuntime.109.0.1518.78.${{ matrix.arch }}.cab -F:* ./src-tauri
+          
+          # Create WebView2 configuration file 
           $webviewConfigContent = @"
           {
             "bundle": {
               "windows": {
                 "webviewInstallMode": {
                   "type": "fixedRuntime",
-                  "path": "./webview2-runtime/${{ matrix.arch }}/"
+                  "path": "./Microsoft.WebView2.FixedVersionRuntime.109.0.1518.78.${{ matrix.arch }}/"
                 }
               }
             },
@@ -193,23 +199,6 @@ jobs:
           
           # Save configuration file
           New-Item -Path "src-tauri" -Name "tauri.windows.conf.json" -ItemType "file" -Value $webviewConfigContent -Force
-          
-          # Download WebView2 runtime
-          mkdir -p src-tauri/webview2-runtime/${{ matrix.arch }}
-          
-          # Choose download link based on architecture
-          if ("${{ matrix.arch }}" -eq "x64") {
-            Invoke-WebRequest -Uri "https://github.com/westinyang/WebView2RuntimeArchive/releases/download/109.0.1518.78/Microsoft.WebView2.FixedVersionRuntime.109.0.1518.78.x64.cab" -OutFile "webview2-runtime.cab"
-          } else {
-            Invoke-WebRequest -Uri "https://github.com/westinyang/WebView2RuntimeArchive/releases/download/109.0.1518.78/Microsoft.WebView2.FixedVersionRuntime.109.0.1518.78.arm64.cab" -OutFile "webview2-runtime.cab"
-          }
-          
-          cmd /c "expand webview2-runtime.cab -F:* .\src-tauri\webview2-runtime\${{ matrix.arch }}\"
-          
-          # Verify files existence
-          if (Test-Path -Path "src-tauri/webview2-runtime/${{ matrix.arch }}") {
-            Write-Host "WebView2 Runtime directory created successfully"
-          }
 
       # Build with tauri action but without uploading artifacts
       - name: Build Tauri App 
