@@ -15,12 +15,14 @@
   "type": "module",
   "main": "index.js",
   "repository": {
-    "url": "https://github.com/Sanyela/CursorPool_Clinet"
+    "url": "https://github.com/Cloxl/CursorPool_Client"
   },
   "author": "Cloxl",
   "license": "MIT",
   "devDependencies": {
-    "vitepress": "^1.0.0-rc.22"
+    "mermaid": "^11.5.0",
+    "vitepress": "^1.0.0-rc.22",
+    "vitepress-plugin-mermaid": "^2.0.17"
   },
   "scripts": {
     "docs:dev": "vitepress dev docs",
@@ -29,9 +31,9 @@
     "build": "npm run docs:build"
   },
   "dependencies": {
-    "medium-zoom": "^1.1.0",
-    "markdown-it-emoji": "^2.0.2",
     "markdown-it-anchor": "^8.6.7",
-    "markdown-it-toc-done-right": "^4.2.0"
+    "markdown-it-emoji": "^2.0.2",
+    "markdown-it-toc-done-right": "^4.2.0",
+    "medium-zoom": "^1.1.0"
   }
 }

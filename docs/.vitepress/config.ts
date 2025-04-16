@@ -1,13 +1,14 @@
 // @ts-ignore
-import {defineConfig} from 'vitepress'
+import { defineConfig } from 'vitepress'
 import markdownItEmoji from 'markdown-it-emoji'
+import { withMermaid } from "vitepress-plugin-mermaid";
 import markdownItAnchor from 'markdown-it-anchor'
 import markdownItToc from 'markdown-it-toc-done-right'
 
-export default defineConfig({
+export default withMermaid(defineConfig({
     lang: 'zh-CN',
     title: 'Cursor Pool 文档',
-    description: 'Cursor Pool - 优化您的 Cursor 使用体验',
+    description: 'Cursor Pool - 赋能下一代生产力',
 
     vite: {
         resolve: {
@@ -25,6 +26,9 @@ export default defineConfig({
         },
     },
 
+    mermaid: {
+        theme: 'default',
+    },
     lastUpdated: true,
     cleanUrls: true,
     
@@ -58,7 +62,7 @@ export default defineConfig({
                 text: '入门指南',
                 collapsed: false,
                 items: [
-                    { text: '软件介绍', link: '/guide/introduction' },
+                    { text: '基础概念', link: '/guide/introduction' },
                     {
                         text: '安装教程',
                         collapsed: true,
@@ -77,18 +81,14 @@ export default defineConfig({
                         text: 'Windows',
                         collapsed: true,
                         items: [
-                            { text: '激活问题', link: '/troubleshooting/windows/activation' },
                             { text: '注入问题', link: '/troubleshooting/windows/injection' },
-                            { text: '常见问题', link: '/troubleshooting/windows/common-issues' },
                         ]
                     },
                     {
                         text: 'macOS',
                         collapsed: true,
                         items: [
-                            { text: '安装问题', link: '/troubleshooting/macos/installation' },
-                            { text: '安全性问题', link: '/troubleshooting/macos/security' },
-                            { text: '常见问题', link: '/troubleshooting/macos/common-issues' },
+                            { text: '权限问题', link: '/troubleshooting/macos/permissions' },
                         ]
                     }
                 ]
@@ -109,11 +109,11 @@ export default defineConfig({
             }
         ],
         editLink: {
-            pattern: 'https://github.com/Sanyela/CursorPool_Clinet/edit/docs/docs/:path',
+            pattern: 'https://github.com/Cloxl/CursorPool_Client/edit/docs/docs/:path',
             text: '在 GitHub 上编辑'
         },
         socialLinks: [
-            { icon: 'github', link: 'https://github.com/Sanyela/CursorPool_Clinet' }
+            { icon: 'github', link: 'https://github.com/Cloxl/CursorPool_Client' }
         ],
         footer: {
             message: 'Released under the MIT License.',
@@ -149,8 +149,8 @@ export default defineConfig({
         }
     },
     sitemap: {
-        hostname: 'https://github.com/Sanyela/CursorPool_Clinet',
+        hostname: 'https://github.com/Cloxl/CursorPool_Client',
         lastmodDateOnly: false
     }
-})
+}))
 

@@ -100,6 +100,6 @@ docs/
 
 ## 🔗 相关链接
 
-- [Cursor Pool 主仓库](https://github.com/Sanyela/CursorPool_Clinet)
-- [问题反馈](https://github.com/Sanyela/CursorPool_Clinet/issues)
+- [Cursor Pool 主仓库](https://github.com/Cloxl/CursorPool_Client)
+- [问题反馈](https://github.com/Cloxl/CursorPool_Client/issues)
 - [VitePress 文档](https://vitepress.dev/) 

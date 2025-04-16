@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: Cursor Pool
-  text: 优化您的 Cursor 使用体验
+  text: 赋能下一代生产力
   tagline: 简单、高效的 Cursor 账户管理工具
   actions:
     - theme: brand
@@ -11,7 +11,7 @@ hero:
       link: /guide/introduction
     - theme: alt
       text: 查看源码
-      link: https://github.com/Sanyela/CursorPool_Clinet
+      link: https://github.com/Cloxl/CursorPool_Client
 
 features:
   - icon: 🚀
