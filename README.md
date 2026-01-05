@@ -14,6 +14,12 @@
 
 **Email:** cloxl@cloxl.com
 
+## 事件经过
+
+关于事前的详细经过，请参阅：
+
+[GitHub Issue #4734 - 完整说明](https://github.com/kirodotdev/Kiro/issues/4734#issuecomment-3709322200)
+
 # Cursor Pool - 多账户管理解决方案
 
 ![开源协议](https://img.shields.io/badge/license-MIT-green) ![版本状态](https://img.shields.io/badge/version-v1.8.4%2B-blue)
