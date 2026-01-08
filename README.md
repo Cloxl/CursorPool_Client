@@ -1,29 +1,3 @@
-# 重要声明
-
-## 项目归属说明
-
-本项目与 **MicoMiOvO** 无任何关联。
-
-- **MicoMiOvO** 仅作为本项目的一个贡献者，并非项目所有者
-- 本项目的所有者为 **`cloxl`**
-- 在 Kiro 项目上，`cloxl` 与 MicoMiOvO 不存在任何形式的合作关系
-
-## 联系方式
-
-如有任何疑问，欢迎通过以下方式联系：
-
-**Email:** cloxl@cloxl.com
-
-## 事件经过
-
-关于事前的详细经过，请参阅：
-
-[GitHub Issue #4734 - 完整说明](https://github.com/kirodotdev/Kiro/issues/4734#issuecomment-3709322200)
-
-# Cursor Pool - 多账户管理解决方案
-
-![开源协议](https://img.shields.io/badge/license-MIT-green) ![版本状态](https://img.shields.io/badge/version-v1.8.4%2B-blue)
-
 ## 🌟 核心功能
 
 ### 账户管理
